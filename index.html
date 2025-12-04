@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Login con Azure Static Web App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { background: white; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); width: 100%; max-width: 500px; overflow: hidden; }
+        .header { background: linear-gradient(135deg, #00A4EF 0%, #0078d4 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .content { padding: 30px; }
+        .login-section h2 { color: #333; margin-bottom: 25px; text-align: center; font-size: 22px; }
+        .btn-login { display: flex; align-items: center; width: 100%; padding: 16px 20px; margin: 15px 0; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; color: white; }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .btn-login i { font-size: 20px; margin-right: 15px; width: 24px; text-align: center; }
+        .btn-microsoft { background: linear-gradient(135deg, #00A4EF 0%, #0078d4 100%); }
+        .btn-google { background: linear-gradient(135deg, #4285F4 0%, #34A853 100%); }
+        .btn-facebook { background: linear-gradient(135deg, #1877F2 0%, #0D65C2 100%); }
+        .user-section { display: none; background: linear-gradient(135deg, #28A745 0%, #20c997 100%); color: white; padding: 25px; border-radius: 15px; margin-top: 20px; animation: fadeIn 0.5s ease; }
+        .btn-logout { background: linear-gradient(135deg, #DC3545 0%, #c82333 100%); display: inline-block; padding: 12px 25px; border-radius: 8px; color: white; text-decoration: none; font-weight: 600; transition: all 0.3s ease; border: none; cursor: pointer; width: 100%; text-align: center; margin-top: 15px; }
+        .btn-logout:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(220,53,69,0.3); }
+        .urls-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 14px; border-top: 1px solid #eee; margin-top: 20px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 600px) { .container { border-radius: 15px; } .header, .content { padding: 20px; } .btn-login { padding: 14px 18px; font-size: 15px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-lock"></i> Autenticación Segura</h1>
+            <p>Azure Static Web App con múltiples proveedores</p>
+        </div>
+        <div class="content">
+            <div class="login-section" id="login-section">
+                <h2>Iniciar Sesión con:</h2>
+                <a href="/.auth/login/aad" class="btn-login btn-microsoft"><i class="fab fa-microsoft"></i>Microsoft / Entra ID</a>
+                <a href="/.auth/login/google" class="btn-login btn-google"><i class="fab fa-google"></i>Google</a>
+                <a href="/.auth/login/facebook" class="btn-login btn-facebook"><i class="fab fa-facebook"></i>Facebook</a>
+            </div>
+            <div class="user-section" id="user-section">
+                <h2><i class="fas fa-user-check"></i> Usuario Autenticado</h2>
+                <div class="user-info">
+                    <p><strong><i class="fas fa-user"></i> Nombre:</strong> <span id="user-name">Cargando...</span></p>
+                    <p><strong><i class="fas fa-envelope"></i> Email:</strong> <span id="user-email">Cargando...</span></p>
+                    <p><strong><i class="fas fa-id-card"></i> Proveedor:</strong> <span id="user-provider">Cargando...</span></p>
+                    <p><strong><i class="fas fa-shield-alt"></i> Roles:</strong> <span id="user-roles">Cargando...</span></p>
+                </div>
+                <a href="/.auth/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+            </div>
+            <div class="urls-section">
+                <h3><i class="fas fa-link"></i> Endpoints Disponibles:</h3>
+                <ul class="urls-list">
+                    <li><a href="/.auth/login/aad" target="_blank">/.auth/login/aad</a> - Login Microsoft</li>
+                    <li><a href="/.auth/login/google" target="_blank">/.auth/login/google</a> - Login Google</li>
+                    <li><a href="/.auth/login/facebook" target="_blank">/.auth/login/facebook</a> - Login Facebook</li>
+                    <li><a href="/.auth/me" target="_blank">/.auth/me</a> - Información del usuario (JSON)</li>
+                    <li><a href="/.auth/logout" target="_blank">/.auth/logout</a> - Cerrar sesión</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <p><i class="fas fa-code"></i> App: static2 | URL: delightful-hill-0b96cdd10.3.azurestaticapps.net</p>
+                <p><i class="fas fa-cloud"></i> Azure Static Web App con Autenticación Integrada</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/.auth/me');
+                const userData = await response.json();
+                if (userData.clientPrincipal) {
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('user-section').style.display = 'block';
+                    const user = userData.clientPrincipal;
+                    document.getElementById('user-name').textContent = user.userDetails;
+                    const emailClaim = user.claims.find(c => c.typ === 'preferred_username' || c.typ === 'email');
+                    document.getElementById('user-email').textContent = emailClaim ? emailClaim.val : 'No disponible';
+                    const provider = user.identityProvider;
+                    let providerName = 'Desconocido', providerIcon = 'fas fa-question';
+                    switch(provider) {
+                        case 'aad': providerName = 'Microsoft Entra ID'; providerIcon = 'fab fa-microsoft'; break;
+                        case 'google': providerName = 'Google'; providerIcon = 'fab fa-google'; break;
+                        case 'facebook': providerName = 'Facebook'; providerIcon = 'fab fa-facebook'; break;
+                    }
+                    document.getElementById('user-provider').innerHTML = `<i class="${providerIcon}"></i> ${providerName}`;
+                    document.getElementById('user-roles').textContent = user.userRoles ? user.userRoles.join(', ') : 'authenticated';
+                } else {
+                    document.getElementById('login-section').style.display = 'block';
+                    document.getElementById('user-section').style.display = 'none';
+                }
+            } catch (error) {
+                document.getElementById('login-section').style.display = 'block';
+                document.getElementById('user-section').style.display = 'none';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', loadUserInfo);
+        setInterval(loadUserInfo, 3000);
+    </script>
+</body>
+</html>
