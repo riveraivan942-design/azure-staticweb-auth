@@ -2,44 +2,43 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Azure Static Web App Login</title>
+    <title>Azure Login Demo</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
-        .btn { display: inline-block; margin: 10px; padding: 15px 25px; 
+        .btn { display: block; margin: 20px auto; padding: 15px; 
                background: #0078D4; color: white; text-decoration: none; 
-               border-radius: 5px; }
+               border-radius: 5px; width: 250px; }
         .google { background: #DB4437; }
         .facebook { background: #4267B2; }
-        .logout { background: #D13438; }
-        .user-info { background: #28A745; color: white; padding: 20px; 
-                    border-radius: 8px; margin: 30px auto; width: 300px; }
+        .logout { background: #DC3545; }
+        .info { background: #28A745; color: white; padding: 20px; 
+                border-radius: 8px; margin: 20px auto; width: 300px; }
     </style>
 </head>
 <body>
-    <h1>Azure Static Web App Authentication</h1>
-    <h3>Login with:</h3>
+    <h1>Azure Static Web App</h1>
+    <h3>Login Demonstration</h3>
     
-    <a href="/.auth/login/aad" class="btn">Microsoft</a>
-    <a href="/.auth/login/google" class="btn google">Google</a>
-    <a href="/.auth/login/facebook" class="btn facebook">Facebook</a>
+    <a href="/.auth/login/aad" class="btn">Microsoft Login</a>
+    <a href="/.auth/login/google" class="btn google">Google Login</a>
+    <a href="/.auth/login/facebook" class="btn facebook">Facebook Login</a>
     
-    <div id="userInfo" class="user-info" style="display:none;">
-        <h2>User Authenticated</h2>
-        <p id="userName"></p>
+    <div id="user" class="info" style="display:none;">
+        <h2>User Information</h2>
+        <p id="username"></p>
         <a href="/.auth/logout" class="btn logout">Logout</a>
     </div>
     
     <script>
         fetch('/.auth/me')
-            .then(response => response.json())
+            .then(r => r.json())
             .then(user => {
                 if (user.clientPrincipal) {
-                    document.getElementById('userInfo').style.display = 'block';
-                    document.getElementById('userName').textContent = 
+                    document.getElementById('user').style.display = 'block';
+                    document.getElementById('username').textContent = 
                         'Welcome: ' + user.clientPrincipal.userDetails;
                 }
-            })
-            .catch(error => console.log('User not authenticated'));
+            });
     </script>
 </body>
 </html>
