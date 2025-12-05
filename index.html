@@ -1,104 +1,215 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔐 Login con Azure Static Web App</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Autenticación con Azure Static Web App</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .container { background: white; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); width: 100%; max-width: 500px; overflow: hidden; }
-        .header { background: linear-gradient(135deg, #00A4EF 0%, #0078d4 100%); color: white; padding: 30px; text-align: center; }
-        .header h1 { font-size: 28px; margin-bottom: 10px; }
-        .content { padding: 30px; }
-        .login-section h2 { color: #333; margin-bottom: 25px; text-align: center; font-size: 22px; }
-        .btn-login { display: flex; align-items: center; width: 100%; padding: 16px 20px; margin: 15px 0; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; color: white; }
-        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .btn-login i { font-size: 20px; margin-right: 15px; width: 24px; text-align: center; }
-        .btn-microsoft { background: linear-gradient(135deg, #00A4EF 0%, #0078d4 100%); }
-        .btn-google { background: linear-gradient(135deg, #4285F4 0%, #34A853 100%); }
-        .btn-facebook { background: linear-gradient(135deg, #1877F2 0%, #0D65C2 100%); }
-        .user-section { display: none; background: linear-gradient(135deg, #28A745 0%, #20c997 100%); color: white; padding: 25px; border-radius: 15px; margin-top: 20px; animation: fadeIn 0.5s ease; }
-        .btn-logout { background: linear-gradient(135deg, #DC3545 0%, #c82333 100%); display: inline-block; padding: 12px 25px; border-radius: 8px; color: white; text-decoration: none; font-weight: 600; transition: all 0.3s ease; border: none; cursor: pointer; width: 100%; text-align: center; margin-top: 15px; }
-        .btn-logout:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(220,53,69,0.3); }
-        .urls-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
-        .footer { text-align: center; padding: 20px; color: #666; font-size: 14px; border-top: 1px solid #eee; margin-top: 20px; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 600px) { .container { border-radius: 15px; } .header, .content { padding: 20px; } .btn-login { padding: 14px 18px; font-size: 15px; } }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            padding: 30px; 
+            max-width: 800px; 
+            margin: 0 auto;
+            background: #f5f5f5;
+        }
+        h1 { 
+            color: #0078D4; 
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-btn { 
+            display: block; 
+            margin: 20px auto; 
+            padding: 18px; 
+            text-decoration: none; 
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            width: 300px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .microsoft { 
+            background: linear-gradient(135deg, #00A4EF, #0078D4); 
+        }
+        .microsoft:hover { background: #0078D4; }
+        
+        .google { 
+            background: linear-gradient(135deg, #4285F4, #0F9D58); 
+        }
+        .google:hover { background: #3367D6; }
+        
+        .facebook { 
+            background: linear-gradient(135deg, #1877F2, #4267B2); 
+        }
+        .facebook:hover { background: #166FE5; }
+        
+        .logout { 
+            background: linear-gradient(135deg, #DC3545, #C82333); 
+            width: 200px;
+            margin-top: 30px;
+        }
+        .logout:hover { background: #C82333; }
+        
+        .user-info { 
+            background: linear-gradient(135deg, #28A745, #20C997); 
+            padding: 25px; 
+            color: white;
+            border-radius: 10px;
+            margin: 30px auto;
+            text-align: center;
+            width: 350px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .urls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .urls a {
+            color: #0078D4;
+            text-decoration: none;
+            display: block;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .urls a:hover {
+            background: #f8f9fa;
+            padding-left: 10px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1><i class="fas fa-lock"></i> Autenticación Segura</h1>
-            <p>Azure Static Web App con múltiples proveedores</p>
-        </div>
-        <div class="content">
-            <div class="login-section" id="login-section">
-                <h2>Iniciar Sesión con:</h2>
-                <a href="/.auth/login/aad" class="btn-login btn-microsoft"><i class="fab fa-microsoft"></i>Microsoft / Entra ID</a>
-                <a href="/.auth/login/google" class="btn-login btn-google"><i class="fab fa-google"></i>Google</a>
-                <a href="/.auth/login/facebook" class="btn-login btn-facebook"><i class="fab fa-facebook"></i>Facebook</a>
-            </div>
-            <div class="user-section" id="user-section">
-                <h2><i class="fas fa-user-check"></i> Usuario Autenticado</h2>
-                <div class="user-info">
-                    <p><strong><i class="fas fa-user"></i> Nombre:</strong> <span id="user-name">Cargando...</span></p>
-                    <p><strong><i class="fas fa-envelope"></i> Email:</strong> <span id="user-email">Cargando...</span></p>
-                    <p><strong><i class="fas fa-id-card"></i> Proveedor:</strong> <span id="user-provider">Cargando...</span></p>
-                    <p><strong><i class="fas fa-shield-alt"></i> Roles:</strong> <span id="user-roles">Cargando...</span></p>
-                </div>
-                <a href="/.auth/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
-            </div>
-            <div class="urls-section">
-                <h3><i class="fas fa-link"></i> Endpoints Disponibles:</h3>
-                <ul class="urls-list">
-                    <li><a href="/.auth/login/aad" target="_blank">/.auth/login/aad</a> - Login Microsoft</li>
-                    <li><a href="/.auth/login/google" target="_blank">/.auth/login/google</a> - Login Google</li>
-                    <li><a href="/.auth/login/facebook" target="_blank">/.auth/login/facebook</a> - Login Facebook</li>
-                    <li><a href="/.auth/me" target="_blank">/.auth/me</a> - Información del usuario (JSON)</li>
-                    <li><a href="/.auth/logout" target="_blank">/.auth/logout</a> - Cerrar sesión</li>
-                </ul>
-            </div>
-            <div class="footer">
-                <p><i class="fas fa-code"></i> App: static2 | URL: delightful-hill-0b96cdd10.3.azurestaticapps.net</p>
-                <p><i class="fas fa-cloud"></i> Azure Static Web App con Autenticación Integrada</p>
-            </div>
-        </div>
+    <h1>🔐 Autenticación con Azure Static Web App</h1>
+    
+    <div id="login-section">
+        <h2 style="text-align: center; color: #333;">Iniciar sesión con:</h2>
+        
+        <a href="/.auth/login/aad" class="login-btn microsoft">
+            🪟 Microsoft / Entra ID
+        </a>
+        
+        <a href="/.auth/login/google" class="login-btn google">
+            🔵 Google
+        </a>
+        
+        <a href="/.auth/login/facebook" class="login-btn facebook">
+            📘 Facebook
+        </a>
     </div>
+    
+    <div id="user-section" class="user-info" style="display: none;">
+        <h2>✅ Usuario autenticado</h2>
+        <p><strong>Nombre:</strong> <span id="user-name"></span></p>
+        <p><strong>Email:</strong> <span id="user-email"></span></p>
+        <p><strong>Proveedor:</strong> <span id="user-provider"></span></p>
+        <p><strong>Roles:</strong> <span id="user-roles"></span></p>
+        
+        <a href="/.auth/logout" class="login-btn logout">
+            🚪 Cerrar sesión
+        </a>
+    </div>
+
+    <div id="status-message" class="status" style="display: none;"></div>
+    
+    <div class="urls">
+        <h3>📋 URLs disponibles:</h3>
+        <a href="/.auth/login/aad" target="_blank">/.auth/login/aad - Login Microsoft</a>
+        <a href="/.auth/login/google" target="_blank">/.auth/login/google - Login Google</a>
+        <a href="/.auth/login/facebook" target="_blank">/.auth/login/facebook - Login Facebook</a>
+        <a href="/.auth/me" target="_blank">/.auth/me - Información del usuario</a>
+        <a href="/.auth/logout" target="_blank">/.auth/logout - Cerrar sesión</a>
+    </div>
+
     <script>
+        // Mostrar mensaje de estado
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status-message');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.style.display = 'block';
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+
+        // Obtener información del usuario autenticado
         async function loadUserInfo() {
             try {
                 const response = await fetch('/.auth/me');
+                if (!response.ok) throw new Error('Error en la respuesta');
+                
                 const userData = await response.json();
+                
                 if (userData.clientPrincipal) {
+                    // Ocultar botones de login
                     document.getElementById('login-section').style.display = 'none';
+                    
+                    // Mostrar información del usuario
                     document.getElementById('user-section').style.display = 'block';
-                    const user = userData.clientPrincipal;
-                    document.getElementById('user-name').textContent = user.userDetails;
-                    const emailClaim = user.claims.find(c => c.typ === 'preferred_username' || c.typ === 'email');
-                    document.getElementById('user-email').textContent = emailClaim ? emailClaim.val : 'No disponible';
-                    const provider = user.identityProvider;
-                    let providerName = 'Desconocido', providerIcon = 'fas fa-question';
-                    switch(provider) {
-                        case 'aad': providerName = 'Microsoft Entra ID'; providerIcon = 'fab fa-microsoft'; break;
-                        case 'google': providerName = 'Google'; providerIcon = 'fab fa-google'; break;
-                        case 'facebook': providerName = 'Facebook'; providerIcon = 'fab fa-facebook'; break;
-                    }
-                    document.getElementById('user-provider').innerHTML = `<i class="${providerIcon}"></i> ${providerName}`;
-                    document.getElementById('user-roles').textContent = user.userRoles ? user.userRoles.join(', ') : 'authenticated';
+                    document.getElementById('user-name').textContent = userData.clientPrincipal.userDetails;
+                    
+                    // Buscar email en claims
+                    const emailClaim = userData.clientPrincipal.claims.find(c => 
+                        c.typ === 'preferred_username' || c.typ === 'email'
+                    );
+                    document.getElementById('user-email').textContent = 
+                        emailClaim ? emailClaim.val : 'No disponible';
+                    
+                    // Determinar proveedor
+                    const provider = userData.clientPrincipal.identityProvider;
+                    const providerName = 
+                        provider === 'aad' ? 'Microsoft' : 
+                        provider === 'google' ? 'Google' : 
+                        provider === 'facebook' ? 'Facebook' : provider;
+                    document.getElementById('user-provider').textContent = providerName;
+                    
+                    // Mostrar roles
+                    document.getElementById('user-roles').textContent = 
+                        userData.clientPrincipal.userRoles?.join(', ') || 'Ninguno';
+                    
+                    showStatus('✅ Sesión iniciada correctamente', 'success');
                 } else {
+                    // Mostrar botones de login
                     document.getElementById('login-section').style.display = 'block';
                     document.getElementById('user-section').style.display = 'none';
                 }
             } catch (error) {
-                document.getElementById('login-section').style.display = 'block';
-                document.getElementById('user-section').style.display = 'none';
+                console.error('Error:', error);
+                showStatus('⚠️ Error al cargar información del usuario', 'error');
             }
         }
-        document.addEventListener('DOMContentLoaded', loadUserInfo);
-        setInterval(loadUserInfo, 3000);
+        
+        // Cargar información al inicio
+        loadUserInfo();
+        
+        // Actualizar cada 10 segundos
+        setInterval(loadUserInfo, 10000);
+
+        // Detectar clics en botones
+        document.querySelectorAll('.login-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (this.classList.contains('logout')) return;
+                showStatus('🔄 Redirigiendo al proveedor de autenticación...', 'success');
+            });
+        });
     </script>
 </body>
 </html>
