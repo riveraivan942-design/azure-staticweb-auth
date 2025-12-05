@@ -2,145 +2,44 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Autenticacion con Azure Static Web App</title>
+    <title>Azure Static Web App Login</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            padding: 20px; 
-            max-width: 800px; 
-            margin: 0 auto;
-            background: #f8f9fa;
-        }
-        h1 { 
-            color: #0078d4; 
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .login-btn { 
-            display: block; 
-            margin: 15px auto; 
-            padding: 15px; 
-            text-decoration: none; 
-            color: white;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-            width: 280px;
-            border: none;
-        }
-        .microsoft { background: #0078d4; }
-        .google { background: #db4437; }
-        .facebook { background: #4267b2; }
-        .logout { background: #dc3545; width: 200px; margin-top: 20px; }
-        
-        .user-info { 
-            background: #28a745; 
-            padding: 20px; 
-            color: white;
-            border-radius: 8px;
-            margin: 20px auto;
-            text-align: center;
-            width: 320px;
-        }
-        .urls {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 30px;
-            border: 1px solid #dee2e6;
-        }
-        .urls a {
-            color: #0078d4;
-            text-decoration: none;
-            display: block;
-            padding: 8px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-        .urls a:last-child {
-            border-bottom: none;
-        }
+        body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
+        .btn { display: inline-block; margin: 10px; padding: 15px 25px; 
+               background: #0078D4; color: white; text-decoration: none; 
+               border-radius: 5px; }
+        .google { background: #DB4437; }
+        .facebook { background: #4267B2; }
+        .logout { background: #D13438; }
+        .user-info { background: #28A745; color: white; padding: 20px; 
+                    border-radius: 8px; margin: 30px auto; width: 300px; }
     </style>
 </head>
 <body>
-    <h1>Autenticacion con Azure Static Web App</h1>
+    <h1>Azure Static Web App Authentication</h1>
+    <h3>Login with:</h3>
     
-    <div id="login-section">
-        <h2 style="text-align: center; color: #495057;">Iniciar sesion con:</h2>
-        
-        <a href="/.auth/login/aad" class="login-btn microsoft">
-            Microsoft / Entra ID
-        </a>
-        
-        <a href="/.auth/login/google" class="login-btn google">
-            Google
-        </a>
-        
-        <a href="/.auth/login/facebook" class="login-btn facebook">
-            Facebook
-        </a>
+    <a href="/.auth/login/aad" class="btn">Microsoft</a>
+    <a href="/.auth/login/google" class="btn google">Google</a>
+    <a href="/.auth/login/facebook" class="btn facebook">Facebook</a>
+    
+    <div id="userInfo" class="user-info" style="display:none;">
+        <h2>User Authenticated</h2>
+        <p id="userName"></p>
+        <a href="/.auth/logout" class="btn logout">Logout</a>
     </div>
     
-    <div id="user-section" class="user-info" style="display: none;">
-        <h2>Usuario autenticado</h2>
-        <p><strong>Nombre:</strong> <span id="user-name"></span></p>
-        <p><strong>Email:</strong> <span id="user-email"></span></p>
-        <p><strong>Proveedor:</strong> <span id="user-provider"></span></p>
-        
-        <a href="/.auth/logout" class="login-btn logout">
-            Cerrar sesion
-        </a>
-    </div>
-    
-    <div class="urls">
-        <h3>URLs disponibles:</h3>
-        <a href="/.auth/login/aad" target="_blank">/.auth/login/aad - Login Microsoft</a>
-        <a href="/.auth/login/google" target="_blank">/.auth/login/google - Login Google</a>
-        <a href="/.auth/login/facebook" target="_blank">/.auth/login/facebook - Login Facebook</a>
-        <a href="/.auth/me" target="_blank">/.auth/me - Informacion del usuario</a>
-        <a href="/.auth/logout" target="_blank">/.auth/logout - Cerrar sesion</a>
-    </div>
-
     <script>
-        // Obtener informacion del usuario autenticado
-        async function loadUserInfo() {
-            try {
-                const response = await fetch('/.auth/me');
-                const userData = await response.json();
-                
-                if (userData.clientPrincipal) {
-                    // Ocultar botones de login
-                    document.getElementById('login-section').style.display = 'none';
-                    
-                    // Mostrar informacion del usuario
-                    document.getElementById('user-section').style.display = 'block';
-                    document.getElementById('user-name').textContent = userData.clientPrincipal.userDetails;
-                    
-                    // Buscar email en claims
-                    const emailClaim = userData.clientPrincipal.claims.find(c => 
-                        c.typ === 'preferred_username' || c.typ === 'email'
-                    );
-                    document.getElementById('user-email').textContent = 
-                        emailClaim ? emailClaim.val : 'No disponible';
-                    
-                    // Determinar proveedor
-                    const provider = userData.clientPrincipal.identityProvider;
-                    const providerName = 
-                        provider === 'aad' ? 'Microsoft' : 
-                        provider === 'google' ? 'Google' : 
-                        provider === 'facebook' ? 'Facebook' : provider;
-                    document.getElementById('user-provider').textContent = providerName;
+        fetch('/.auth/me')
+            .then(response => response.json())
+            .then(user => {
+                if (user.clientPrincipal) {
+                    document.getElementById('userInfo').style.display = 'block';
+                    document.getElementById('userName').textContent = 
+                        'Welcome: ' + user.clientPrincipal.userDetails;
                 }
-            } catch (error) {
-                console.log('Usuario no autenticado');
-            }
-        }
-        
-        // Cargar informacion al inicio
-        loadUserInfo();
-        
-        // Actualizar cada 5 segundos
-        setInterval(loadUserInfo, 5000);
+            })
+            .catch(error => console.log('User not authenticated'));
     </script>
 </body>
 </html>
